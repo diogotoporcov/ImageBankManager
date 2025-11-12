@@ -3,6 +3,8 @@ from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
+from api.models import Collection
+
 User = get_user_model()
 
 
@@ -70,3 +72,20 @@ class TestUserModel(TestCase):
         self.assertIsInstance(user1.id, uuid.UUID)
         self.assertIsInstance(user2.id, uuid.UUID)
         self.assertNotEqual(user1.id, user2.id)
+
+    def test_default_collection_created_on_user_creation(self):
+        user = User.objects.create_user(
+            username="user_with_default_collection",
+            password=self.DEFAULT_PASSWORD,
+            full_name=self.DEFAULT_FULL_NAME,
+        )
+
+        default_collections = Collection.objects.filter(owner=user, is_default=True)
+        self.assertEqual(default_collections.count(), 1)
+
+        default_collection = default_collections.first()
+        self.assertTrue(default_collection.is_default)
+        self.assertEqual(default_collection.owner, user)
+
+        delta = abs(default_collection.created_at.timestamp() - user.created_at.timestamp())
+        self.assertLessEqual(delta, 0.25)

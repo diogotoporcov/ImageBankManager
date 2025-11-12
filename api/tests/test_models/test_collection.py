@@ -72,12 +72,6 @@ class TestCollectionModel(TestCase):
         self.assertNotEqual(c1.id, c2.id)
 
     def test_default_collection_uniqueness_per_owner(self):
-        Collection.objects.create(
-            owner=self.user,
-            name=self.DEFAULT_COLLECTION_NAME + " Default",
-            is_default=True
-        )
-
         with self.assertRaises(ValidationError):
             Collection.objects.create(
                 owner=self.user,
@@ -96,11 +90,7 @@ class TestCollectionModel(TestCase):
             c.save()
 
     def test_prevent_deleting_default_collection(self):
-        default_col = Collection.objects.create(
-            owner=self.user,
-            name=self.DEFAULT_COLLECTION_NAME + " Default",
-            is_default=True
-        )
+        default_col = self.user.collections.filter(is_default=True).first()
 
         with self.assertRaises(ValidationError):
             default_col.delete()
