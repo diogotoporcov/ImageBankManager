@@ -1,4 +1,6 @@
 import uuid
+
+from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -76,5 +78,5 @@ class TestLabelModel(TestCase):
             label=self.DEFAULT_LABEL + " Duplicate"
         )
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             Label.objects.create(owner=self.user, label=label1.label)
