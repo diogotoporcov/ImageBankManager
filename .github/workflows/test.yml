@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - master
-      - "test/api/**"
+      - "test/**"
   pull_request:
     branches:
       - master
-      - "test/api/**"
+      - "test/**"
 
 jobs:
   test:
