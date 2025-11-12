@@ -1,0 +1,6 @@
+.venv/
+.idea/
+*.sqlite3
+merger.ignore
+merger.txt
+*__pycache__*
