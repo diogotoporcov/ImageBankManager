@@ -3,3 +3,4 @@ djangorestframework
 environs
 pgvector
 django-guardian
+psycopg2-binary
