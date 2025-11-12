@@ -3,8 +3,6 @@ from typing import TYPE_CHECKING
 
 from django.db import models
 
-from api.services.permissions.utils import model_permissions
-
 
 class Image(models.Model):
     id = models.UUIDField(

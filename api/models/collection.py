@@ -4,9 +4,6 @@ from typing import TYPE_CHECKING
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api.services.permissions.enums import Permission
-from api.services.permissions.utils import model_permissions
-
 
 class Collection(models.Model):
     id = models.UUIDField(
