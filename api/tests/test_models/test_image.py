@@ -1,10 +1,10 @@
 import uuid
-from pathlib import Path
 from typing import Optional
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth import get_user_model
+
 from api.models import Image, Collection, Label
 
 User = get_user_model()
