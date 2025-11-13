@@ -1,8 +1,8 @@
 from rest_framework import serializers
+
 from api.models import Label, Image
 from api.models.collection import Collection
 from api.serializers.label import LabelSerializer
-from api.serializers.image import ImageSerializer
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -15,7 +15,10 @@ class CollectionSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
-    images = ImageSerializer(many=True, read_only=True)
+    images = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True
+    )
     image_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Image.objects.all(),
