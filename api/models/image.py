@@ -1,7 +1,18 @@
+import re
 import uuid
 from typing import TYPE_CHECKING
 
+from django.core.exceptions import ValidationError
 from django.db import models
+
+MIME_TYPE_REGEX = r"^image\/[a-z0-9\-\+\.]+$"
+ALLOWED_MIME_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/bmp",
+    "image/tiff",
+}
 
 
 class Image(models.Model):
@@ -47,7 +58,16 @@ class Image(models.Model):
     def __str__(self):
         return f"{self.filename} ({self.owner.username})"
 
+    def clean(self):
+        if not re.match(MIME_TYPE_REGEX, self.mime_type):
+            raise ValidationError({"mime_type": "Invalid mime type format."})
+
+        if self.mime_type not in ALLOWED_MIME_TYPES:
+            raise ValidationError({"mime_type": "Mime type not allowed."})
+
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         self.owner = self.collection.owner
 
         if not self.stored_filename and self.filename:
