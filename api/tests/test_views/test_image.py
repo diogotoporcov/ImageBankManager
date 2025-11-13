@@ -38,18 +38,14 @@ class TestImageViewSet(APITestCase):
         self.label = Label.objects.create(owner=self.user1, label="Label 1")
 
         self.image1 = Image.objects.create(
-            owner=self.user1,
             collection=self.col1,
-            stored_filename="image1.jpg",
             filename="image1.jpg",
             mime_type="image/jpeg",
             size_bytes=1000,
         )
 
         self.image2 = Image.objects.create(
-            owner=self.user2,
             collection=self.col2,
-            stored_filename="image2.jpg",
             filename="image2.jpg",
             mime_type="image/jpeg",
             size_bytes=2000,
@@ -69,9 +65,7 @@ class TestImageViewSet(APITestCase):
 
     def test_create_image(self) -> None:
         payload = {
-            "owner": str(self.user1.id),
             "collection": str(self.col1.id),
-            "stored_filename": "stored_filename.jpg",
             "filename": "filename.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
@@ -90,20 +84,17 @@ class TestImageViewSet(APITestCase):
 
     def test_create_missing_required_fields_fails(self) -> None:
         payload = {
-            "owner": str(self.user1.id),
             "collection": str(self.col1.id),
         }
         resp = self.client.post(self.list_url, data=payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("stored_filename", resp.json())
+        self.assertIn("filename", resp.json())
 
     def test_create_ignores_readonly_fields(self) -> None:
         now = datetime.now(timezone.utc).isoformat()
 
         payload = {
-            "owner": str(self.user1.id),
             "collection": str(self.col1.id),
-            "stored_filename": "stored_filename.jpg",
             "filename": "filename.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
@@ -129,9 +120,7 @@ class TestImageViewSet(APITestCase):
     def test_put_updates_image(self) -> None:
         url = reverse("image-detail", kwargs={"pk": str(self.image1.id)})
         payload = {
-            "owner": str(self.user1.id),
             "collection": str(self.col1.id),
-            "stored_filename": "updated.jpg",
             "filename": "updated.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
@@ -141,23 +130,21 @@ class TestImageViewSet(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         self.image1.refresh_from_db()
-        self.assertEqual(self.image1.stored_filename, "updated.jpg")
+        self.assertEqual(self.image1.filename, "updated.jpg")
         self.assertEqual(self.image1.size_bytes, 1000)
 
     def test_patch_updates_partial_fields(self) -> None:
         url = reverse("image-detail", kwargs={"pk": str(self.image2.id)})
 
-        resp = self.client.patch(url, data={"stored_filename": "patch.jpg"}, format="json")
+        resp = self.client.patch(url, data={"filename": "patch.jpg"}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         self.image2.refresh_from_db()
-        self.assertEqual(self.image2.stored_filename, "patch.jpg")
+        self.assertEqual(self.image2.filename, "patch.jpg")
 
     def test_delete_removes_image(self) -> None:
         image = Image.objects.create(
-            owner=self.user1,
             collection=self.col1,
-            stored_filename="del.jpg",
             filename="del.jpg",
             mime_type="image/jpeg",
             size_bytes=10,

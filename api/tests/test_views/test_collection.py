@@ -37,9 +37,7 @@ class TestCollectionViewSet(APITestCase):
 
         self.label = Label.objects.create(owner=self.u1, label="Test Label")
         self.image = Image.objects.create(
-            owner=self.u1,
             collection=self.c1,
-            stored_filename="stored_filename.jpg",
             filename="filename.jpg",
             mime_type="image/jpeg",
             size_bytes=1234,

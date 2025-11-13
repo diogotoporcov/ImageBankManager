@@ -31,11 +31,9 @@ class TestImageSerializer(TestCase):
         self.label = Label.objects.create(owner=self.user, label="Serializer Label")
 
         self.valid_data = {
-            "stored_filename": "stored_filename.jpg",
             "filename": self.DEFAULT_FILENAME,
             "mime_type": self.DEFAULT_MIME_TYPE,
             "size_bytes": self.DEFAULT_SIZE_BYTES,
-            "owner": self.user.id,
             "collection": self.collection.id,
             "label_ids": [self.label.id],
         }
@@ -91,9 +89,7 @@ class TestImageSerializer(TestCase):
 
     def test_serialized_output_contains_expected_fields(self):
         image = Image.objects.create(
-            owner=self.user,
             collection=self.collection,
-            stored_filename="output_image.jpg",
             filename="output_image.jpg",
             mime_type=self.DEFAULT_MIME_TYPE,
             size_bytes=self.DEFAULT_SIZE_BYTES,
@@ -105,7 +101,6 @@ class TestImageSerializer(TestCase):
 
         expected_fields = {
             "id",
-            "stored_filename",
             "filename",
             "mime_type",
             "size_bytes",
