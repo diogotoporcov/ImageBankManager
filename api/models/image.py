@@ -2,6 +2,7 @@ import re
 import uuid
 from typing import TYPE_CHECKING
 
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -41,7 +42,12 @@ class Image(models.Model):
     mime_type = models.CharField(max_length=100)
     size_bytes = models.BigIntegerField()
 
-    labels = models.ManyToManyField("Label", related_name="images", blank=True)
+    labels = ArrayField(
+        base_field=models.CharField(max_length=64),
+        default=list,
+        blank=True,
+        size=16
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -59,11 +65,8 @@ class Image(models.Model):
         return f"{self.filename} ({self.owner.username})"
 
     def clean(self):
-        if not re.match(MIME_TYPE_REGEX, self.mime_type):
-            raise ValidationError({"mime_type": "Invalid mime type format."})
-
-        if self.mime_type not in ALLOWED_MIME_TYPES:
-            raise ValidationError({"mime_type": "Mime type not allowed."})
+        self._validate_mime_type()
+        self._validate_labels()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -74,3 +77,17 @@ class Image(models.Model):
         self.stored_filename = f"{self.id}.{ext}"
 
         super().save(*args, **kwargs)
+
+    def _validate_mime_type(self):
+        if not re.match(MIME_TYPE_REGEX, self.mime_type):
+            raise ValidationError({"mime_type": "Invalid mime type format."})
+
+        if self.mime_type not in ALLOWED_MIME_TYPES:
+            raise ValidationError({"mime_type": "Mime type not allowed."})
+
+    def _validate_labels(self):
+        if not isinstance(self.labels, list) or not all(isinstance(label, str) for label in self.labels):
+            raise ValidationError("Labels must be a list of strings.")
+
+        if len(self.labels) != len(set(self.labels)):
+            raise ValidationError("Labels must be unique.")
