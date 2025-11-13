@@ -31,17 +31,11 @@ class TestImageModel(TestCase):
             filename = self.DEFAULT_FILENAME
 
         image = Image.objects.create(
-            owner=self.user,
             collection=self.collection,
-            stored_filename="temp",
             filename=filename,
             mime_type=self.DEFAULT_MIME_TYPE,
             size_bytes=self.DEFAULT_SIZE_BYTES
         )
-
-        extension = Path(filename).suffix
-        stored_filename = f"{image.id}{extension}"
-        image.stored_filename = stored_filename
 
         return image
 
@@ -100,3 +94,39 @@ class TestImageModel(TestCase):
 
         self.assertIn(label, image.labels.all())
         self.assertIn(image, label.images.all())
+
+    def test_owner_is_auto_generated(self):
+        dummy_user = User.objects.create_user(
+            username="dummy_user",
+            password="test_password",
+            full_name="Dummy User"
+        )
+
+        image = Image.objects.create(
+            collection=self.collection,
+            owner=dummy_user,
+            filename="file.jpg",
+            mime_type="image/jpeg",
+            size_bytes=500,
+        )
+
+        image.refresh_from_db()
+
+        self.assertEqual(image.owner, self.user)
+        self.assertNotEqual(image.owner, dummy_user)
+
+    def test_stored_filename_is_auto_generated(self):
+        image = Image.objects.create(
+            collection=self.collection,
+            stored_filename="name.jpg",
+            filename="file.jpg",
+            mime_type="image/jpeg",
+            size_bytes=500,
+        )
+
+        image.refresh_from_db()
+
+        expected_stored = f"{image.id}.jpeg"
+
+        self.assertEqual(image.stored_filename, expected_stored)
+        self.assertNotEqual(image.stored_filename, "name.jpg")

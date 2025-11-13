@@ -70,8 +70,7 @@ class Image(models.Model):
 
         self.owner = self.collection.owner
 
-        if not self.stored_filename and self.filename:
-            ext = self.mime_type.removeprefix("image/").lower()
-            self.stored_filename = f"{self.id}.{ext}"
+        ext = self.mime_type.removeprefix("image/").lower()
+        self.stored_filename = f"{self.id}.{ext}"
 
         super().save(*args, **kwargs)
