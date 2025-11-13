@@ -14,7 +14,8 @@ class Image(models.Model):
     owner = models.ForeignKey(
         "User",
         on_delete=models.CASCADE,
-        related_name="images"
+        related_name="images",
+        editable=False
     )
 
     collection = models.ForeignKey(
@@ -47,6 +48,8 @@ class Image(models.Model):
         return f"{self.filename} ({self.owner.username})"
 
     def save(self, *args, **kwargs):
+        self.owner = self.collection.owner
+
         if not self.stored_filename and self.filename:
             ext = self.mime_type.removeprefix("image/").lower()
             self.stored_filename = f"{self.id}.{ext}"

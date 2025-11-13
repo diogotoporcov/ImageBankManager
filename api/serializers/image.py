@@ -33,6 +33,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
         read_only_fields = [
             "id",
+            "owner",
             "stored_filename",
             "created_at",
             "updated_at"
