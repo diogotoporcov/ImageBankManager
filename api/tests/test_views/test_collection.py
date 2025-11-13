@@ -25,19 +25,19 @@ class TestCollectionViewSet(APITestCase):
         )
         self.client.force_authenticate(self.admin)
 
-        self.u1 = User.objects.create_user(
+        self.user1 = User.objects.create_user(
             username="user1", password=self.DEFAULT_PASSWORD, full_name="User One"
         )
-        self.u2 = User.objects.create_user(
+        self.user2 = User.objects.create_user(
             username="user2", password=self.DEFAULT_PASSWORD, full_name="User Two"
         )
 
-        self.c1 = Collection.objects.create(owner=self.u1, name="C1")
-        self.c2 = Collection.objects.create(owner=self.u2, name="C2")
+        self.collection1 = Collection.objects.create(owner=self.user1, name="Collection 1")
+        self.collection2 = Collection.objects.create(owner=self.user2, name="Collection 2")
 
-        self.label = Label.objects.create(owner=self.u1, label="Test Label")
+        self.label = Label.objects.create(owner=self.user1, label="Test Label")
         self.image = Image.objects.create(
-            collection=self.c1,
+            collection=self.collection1,
             filename="filename.jpg",
             mime_type="image/jpeg",
             size_bytes=1234,
@@ -58,26 +58,31 @@ class TestCollectionViewSet(APITestCase):
     def test_create_collection(self) -> None:
         payload = {
             "name": "CreatedCol",
-            "owner": str(self.u1.id),
+            "owner": self.user1.id,
             "label_ids": [self.label.id],
             "image_ids": [self.image.id],
         }
 
-        resp = self.client.post(self.list_url, data=payload, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        print(self.user1.id == self.label.owner.id == self.image.owner.id)
 
+        resp = self.client.post(self.list_url, data=payload, format="json")
         body = resp.json()
+        print("START OIE")
+        print(body)
+        print("END OIE")
+
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         created = Collection.objects.get(id=body["id"])
 
         self.assertEqual(created.name, "CreatedCol")
-        self.assertEqual(created.owner, self.u1)
+        self.assertEqual(created.owner, self.user1)
         self.assertIn(self.label, created.labels.all())
         self.assertIn(self.image, created.images.all())
 
     def test_create_ignores_readonly_fields(self) -> None:
         payload = {
             "name": "ColIgnore",
-            "owner": str(self.u1.id),
+            "owner": str(self.user1.id),
             "is_default": True,
         }
 
@@ -88,59 +93,59 @@ class TestCollectionViewSet(APITestCase):
         self.assertFalse(created.is_default)
 
     def test_create_missing_required_fields_fails(self) -> None:
-        payload = {"owner": str(self.u1.id)}
+        payload = {"owner": str(self.user1.id)}
         resp = self.client.post(self.list_url, data=payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("name", resp.json())
 
     def test_retrieve_collection(self) -> None:
-        url = reverse("collection-detail", kwargs={"pk": str(self.c1.id)})
+        url = reverse("collection-detail", kwargs={"pk": str(self.collection1.id)})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         data = resp.json()
-        self.assertEqual(UUID(data["id"]), self.c1.id)
-        self.assertEqual(data["name"], self.c1.name)
+        self.assertEqual(UUID(data["id"]), self.collection1.id)
+        self.assertEqual(data["name"], self.collection1.name)
 
     def test_put_updates_collection(self) -> None:
-        url = reverse("collection-detail", kwargs={"pk": str(self.c1.id)})
+        url = reverse("collection-detail", kwargs={"pk": str(self.collection1.id)})
         payload = {
             "name": "C1 Updated",
-            "owner": str(self.u1.id),
+            "owner": str(self.user1.id),
         }
 
         resp = self.client.put(url, data=payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-        self.c1.refresh_from_db()
-        self.assertEqual(self.c1.name, "C1 Updated")
+        self.collection1.refresh_from_db()
+        self.assertEqual(self.collection1.name, "C1 Updated")
 
     def test_put_cannot_set_is_default(self) -> None:
-        url = reverse("collection-detail", kwargs={"pk": str(self.c1.id)})
+        url = reverse("collection-detail", kwargs={"pk": str(self.collection1.id)})
         payload = {
             "name": "NewName",
-            "owner": str(self.u1.id),
+            "owner": str(self.user1.id),
             "is_default": True,
         }
 
         resp = self.client.put(url, data=payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-        self.c1.refresh_from_db()
-        self.assertFalse(self.c1.is_default)
-        self.assertEqual(self.c1.name, "NewName")
+        self.collection1.refresh_from_db()
+        self.assertFalse(self.collection1.is_default)
+        self.assertEqual(self.collection1.name, "NewName")
 
     def test_patch_updates_partial_fields(self) -> None:
-        url = reverse("collection-detail", kwargs={"pk": str(self.c2.id)})
+        url = reverse("collection-detail", kwargs={"pk": str(self.collection2.id)})
 
         resp = self.client.patch(url, data={"name": "C2 Patched"}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-        self.c2.refresh_from_db()
-        self.assertEqual(self.c2.name, "C2 Patched")
+        self.collection2.refresh_from_db()
+        self.assertEqual(self.collection2.name, "C2 Patched")
 
     def test_delete_removes_collection(self) -> None:
-        col = Collection.objects.create(owner=self.u1, name="DeleteMe")
+        col = Collection.objects.create(owner=self.user1, name="DeleteMe")
         url = reverse("collection-detail", kwargs={"pk": str(col.id)})
 
         resp = self.client.delete(url)
@@ -148,7 +153,7 @@ class TestCollectionViewSet(APITestCase):
         self.assertFalse(Collection.objects.filter(id=col.id).exists())
 
     def test_delete_fails_for_default_collection(self) -> None:
-        default_col = self.u1.collections.filter(is_default=True).first()
+        default_col = self.user1.collections.filter(is_default=True).first()
         url = reverse("collection-detail", kwargs={"pk": str(default_col.id)})
 
         with self.assertRaises(ValidationError):
@@ -157,7 +162,7 @@ class TestCollectionViewSet(APITestCase):
     def test_create_second_default_collection_disallowed(self) -> None:
         payload = {
             "name": "AnotherDefault",
-            "owner": str(self.u1.id),
+            "owner": str(self.user1.id),
             "is_default": True,
         }
 
@@ -167,5 +172,5 @@ class TestCollectionViewSet(APITestCase):
         new_col = Collection.objects.get(id=resp.json()["id"])
         self.assertFalse(new_col.is_default)
 
-        default_count = Collection.objects.filter(owner=self.u1, is_default=True).count()
+        default_count = Collection.objects.filter(owner=self.user1, is_default=True).count()
         self.assertEqual(default_count, 1)

@@ -1,3 +1,6 @@
+from typing import List
+
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from api.models import Label, Image
@@ -48,3 +51,14 @@ class CollectionSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at"
         ]
+
+    def validate_label_ids(self, labels: List[Label]) -> List[Label]:
+        owner: str = self.initial_data.get("owner") or self.instance.owner.id
+
+        for label in labels:
+            if str(label.owner.id) != str(owner):
+                raise ValidationError(
+                    f"Label '{str(label)}' does not belong to the same owner as the collection."
+                )
+
+        return labels

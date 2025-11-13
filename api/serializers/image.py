@@ -1,8 +1,10 @@
 import re
+from typing import List
 
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from api.models import Label
+from api.models import Label, Collection
 from api.models.image import Image, MIME_TYPE_REGEX, ALLOWED_MIME_TYPES
 from api.serializers import LabelSerializer
 
@@ -48,3 +50,19 @@ class ImageSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("MIME type not allowed.")
 
         return value
+
+    def validate_label_ids(self, labels: List[Label]) -> List[Label]:
+        collection: Collection = (
+            self.initial_data.get("collection")
+            and Collection.objects.get(id=self.initial_data["collection"])
+        ) or self.instance.collection
+
+        owner_id = collection.owner_id
+
+        for label in labels:
+            if label.owner_id != owner_id:
+                raise ValidationError(
+                    f"Label '{label.label}' does not belong to the same owner as the image/collection."
+                )
+
+        return labels
