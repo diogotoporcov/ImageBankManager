@@ -32,7 +32,7 @@ class TestImageSerializer(TestCase):
 
         self.valid_data = {
             "stored_filename": "stored_filename.jpg",
-            "original_filename": self.DEFAULT_FILENAME,
+            "filename": self.DEFAULT_FILENAME,
             "mime_type": self.DEFAULT_MIME_TYPE,
             "size_bytes": self.DEFAULT_SIZE_BYTES,
             "owner": self.user.id,
@@ -48,7 +48,7 @@ class TestImageSerializer(TestCase):
         self.assertIsInstance(image, Image)
         self.assertEqual(image.owner, self.user)
         self.assertEqual(image.collection, self.collection)
-        self.assertEqual(image.original_filename, self.DEFAULT_FILENAME)
+        self.assertEqual(image.filename, self.DEFAULT_FILENAME)
         self.assertEqual(image.mime_type, self.DEFAULT_MIME_TYPE)
         self.assertEqual(image.size_bytes, self.DEFAULT_SIZE_BYTES)
         self.assertIn(self.label, image.labels.all())
@@ -77,7 +77,7 @@ class TestImageSerializer(TestCase):
         }
         serializer = ImageSerializer(data=invalid_data)
         self.assertFalse(serializer.is_valid())
-        self.assertIn("original_filename", serializer.errors)
+        self.assertIn("filename", serializer.errors)
         self.assertIn("mime_type", serializer.errors)
         self.assertIn("size_bytes", serializer.errors)
 
@@ -94,7 +94,7 @@ class TestImageSerializer(TestCase):
             owner=self.user,
             collection=self.collection,
             stored_filename="output_image.jpg",
-            original_filename="output_image.jpg",
+            filename="output_image.jpg",
             mime_type=self.DEFAULT_MIME_TYPE,
             size_bytes=self.DEFAULT_SIZE_BYTES,
         )
@@ -106,7 +106,7 @@ class TestImageSerializer(TestCase):
         expected_fields = {
             "id",
             "stored_filename",
-            "original_filename",
+            "filename",
             "mime_type",
             "size_bytes",
             "owner",
@@ -117,7 +117,7 @@ class TestImageSerializer(TestCase):
         }
 
         self.assertTrue(expected_fields.issubset(data.keys()))
-        self.assertEqual(data["original_filename"], image.original_filename)
+        self.assertEqual(data["filename"], image.filename)
         self.assertEqual(data["mime_type"], self.DEFAULT_MIME_TYPE)
         self.assertEqual(data["owner"], self.user.id)
         self.assertEqual(data["collection"], self.collection.id)

@@ -41,7 +41,7 @@ class TestImageViewSet(APITestCase):
             owner=self.user1,
             collection=self.col1,
             stored_filename="image1.jpg",
-            original_filename="image1.jpg",
+            filename="image1.jpg",
             mime_type="image/jpeg",
             size_bytes=1000,
         )
@@ -50,7 +50,7 @@ class TestImageViewSet(APITestCase):
             owner=self.user2,
             collection=self.col2,
             stored_filename="image2.jpg",
-            original_filename="image2.jpg",
+            filename="image2.jpg",
             mime_type="image/jpeg",
             size_bytes=2000,
         )
@@ -72,7 +72,7 @@ class TestImageViewSet(APITestCase):
             "owner": str(self.user1.id),
             "collection": str(self.col1.id),
             "stored_filename": "stored_filename.jpg",
-            "original_filename": "original_filename.jpg",
+            "filename": "filename.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
             "label_ids": [self.label.id],
@@ -104,7 +104,7 @@ class TestImageViewSet(APITestCase):
             "owner": str(self.user1.id),
             "collection": str(self.col1.id),
             "stored_filename": "stored_filename.jpg",
-            "original_filename": "original_filename.jpg",
+            "filename": "filename.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
             "created_at": now,
@@ -124,7 +124,7 @@ class TestImageViewSet(APITestCase):
 
         data = resp.json()
         self.assertEqual(UUID(data["id"]), self.image1.id)
-        self.assertEqual(data["original_filename"], self.image1.original_filename)
+        self.assertEqual(data["filename"], self.image1.filename)
 
     def test_put_updates_image(self) -> None:
         url = reverse("image-detail", kwargs={"pk": str(self.image1.id)})
@@ -132,7 +132,7 @@ class TestImageViewSet(APITestCase):
             "owner": str(self.user1.id),
             "collection": str(self.col1.id),
             "stored_filename": "updated.jpg",
-            "original_filename": "updated.jpg",
+            "filename": "updated.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
         }
@@ -158,7 +158,7 @@ class TestImageViewSet(APITestCase):
             owner=self.user1,
             collection=self.col1,
             stored_filename="del.jpg",
-            original_filename="del.jpg",
+            filename="del.jpg",
             mime_type="image/jpeg",
             size_bytes=10,
         )

@@ -25,7 +25,7 @@ class Image(models.Model):
     )
 
     stored_filename = models.CharField(max_length=256, editable=False)
-    original_filename = models.CharField(max_length=256)
+    filename = models.CharField(max_length=256)
     mime_type = models.CharField(max_length=100)
     size_bytes = models.BigIntegerField()
 
@@ -44,10 +44,10 @@ class Image(models.Model):
         duplicates: RelatedManager[ImageDuplicate]
 
     def __str__(self):
-        return f"{self.original_filename} ({self.owner.username})"
+        return f"{self.filename} ({self.owner.username})"
 
     def save(self, *args, **kwargs):
-        if not self.stored_filename and self.original_filename:
+        if not self.stored_filename and self.filename:
             ext = self.mime_type.removeprefix("image/").lower()
             self.stored_filename = f"{self.id}.{ext}"
 

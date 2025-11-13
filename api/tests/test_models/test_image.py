@@ -26,20 +26,20 @@ class TestImageModel(TestCase):
             name="Test Image Collection"
         )
 
-    def _create_image(self, original_filename: Optional[str] = None):
-        if original_filename is None:
-            original_filename = self.DEFAULT_FILENAME
+    def _create_image(self, filename: Optional[str] = None):
+        if filename is None:
+            filename = self.DEFAULT_FILENAME
 
         image = Image.objects.create(
             owner=self.user,
             collection=self.collection,
             stored_filename="temp",
-            original_filename=original_filename,
+            filename=filename,
             mime_type=self.DEFAULT_MIME_TYPE,
             size_bytes=self.DEFAULT_SIZE_BYTES
         )
 
-        extension = Path(original_filename).suffix
+        extension = Path(filename).suffix
         stored_filename = f"{image.id}{extension}"
         image.stored_filename = stored_filename
 
@@ -50,7 +50,7 @@ class TestImageModel(TestCase):
         self.assertIsInstance(image.id, uuid.UUID)
         self.assertEqual(image.owner, self.user)
         self.assertEqual(image.collection, self.collection)
-        self.assertEqual(image.original_filename, self.DEFAULT_FILENAME)
+        self.assertEqual(image.filename, self.DEFAULT_FILENAME)
         self.assertEqual(image.mime_type, self.DEFAULT_MIME_TYPE)
         self.assertEqual(image.size_bytes, self.DEFAULT_SIZE_BYTES)
         self.assertIsNotNone(image.created_at)
@@ -58,7 +58,7 @@ class TestImageModel(TestCase):
 
     def test_str_representation(self):
         image = self._create_image()
-        expected = f"{image.original_filename} ({self.user.username})"
+        expected = f"{image.filename} ({self.user.username})"
         self.assertEqual(str(image), expected)
 
     def test_auto_timestamps(self):
@@ -86,8 +86,8 @@ class TestImageModel(TestCase):
         self.assertIsInstance(image2.id, uuid.UUID)
         self.assertNotEqual(image1.id, image2.id)
         self.assertNotEqual(image1.stored_filename, image2.stored_filename)
-        self.assertEqual(image1.original_filename, filename1)
-        self.assertEqual(image2.original_filename, filename2)
+        self.assertEqual(image1.filename, filename1)
+        self.assertEqual(image2.filename, filename2)
 
     def test_label_association(self):
         label = Label.objects.create(

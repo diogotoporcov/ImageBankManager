@@ -30,7 +30,7 @@ class TestCollectionSerializer(TestCase):
             owner=self.user,
             collection=self.collection,
             stored_filename="stored_filename.jpg",
-            original_filename="original_filename.jpg",
+            filename="filename.jpg",
             mime_type="image/jpeg",
             size_bytes=1024,
         )
@@ -103,4 +103,4 @@ class TestCollectionSerializer(TestCase):
         self.assertEqual(len(data["labels"]), 1)
         self.assertEqual(len(data["images"]), 1)
         self.assertEqual(data["labels"][0]["label"], self.label.label)
-        self.assertEqual(data["images"][0]["original_filename"], self.image.original_filename)
+        self.assertEqual(data["images"][0]["filename"], self.image.filename)

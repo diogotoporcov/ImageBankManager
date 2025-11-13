@@ -20,7 +20,7 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "stored_filename",
-            "original_filename",
+            "filename",
             "mime_type",
             "size_bytes",
             "owner",

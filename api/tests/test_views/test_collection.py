@@ -40,7 +40,7 @@ class TestCollectionViewSet(APITestCase):
             owner=self.u1,
             collection=self.c1,
             stored_filename="stored_filename.jpg",
-            original_filename="original_filename.jpg",
+            filename="filename.jpg",
             mime_type="image/jpeg",
             size_bytes=1234,
         )
