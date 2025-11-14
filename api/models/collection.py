@@ -7,8 +7,16 @@ from api.models.abstract import HasLabels, HasOwner, HasUUID, TimeStampedModel
 
 
 class Collection(HasUUID, HasOwner, HasLabels, TimeStampedModel):
-    name = models.CharField(max_length=64)
-    is_default = models.BooleanField(default=False, editable=False)
+    name = models.CharField(
+        max_length=64,
+        help_text="Name of the collection."
+    )
+
+    is_default = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text="Indicates whether this is the user default selection. Managed by the system."
+    )
 
     if TYPE_CHECKING:
         from api.models.image import Image

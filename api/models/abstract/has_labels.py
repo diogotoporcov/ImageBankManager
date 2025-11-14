@@ -11,6 +11,7 @@ class HasLabels(models.Model):
         default=list,
         blank=True,
         size=16,
+        help_text="List of labels associated with this item. Supports up to 16 entries.",
     )
 
     if TYPE_CHECKING:

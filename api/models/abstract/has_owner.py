@@ -9,6 +9,7 @@ class HasOwner(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="%(class)ss",
+        help_text="User who created this item."
     )
 
     if TYPE_CHECKING:
