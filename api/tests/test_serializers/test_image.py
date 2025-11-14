@@ -117,3 +117,15 @@ class TestImageSerializer(TestCase):
         self.assertEqual(data["owner"], self.user.id)
         self.assertEqual(data["collection"], self.collection.id)
         self.assertEqual(data["labels"], ["x"])
+
+    def test_mime_type_is_lowercased(self):
+        data = {
+            **self.valid_data,
+            "mime_type": "ImAgE/jPeG",
+        }
+
+        serializer = ImageSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+        image = serializer.save()
+        self.assertEqual(image.mime_type, "image/jpeg")

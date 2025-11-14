@@ -122,6 +122,15 @@ class TestImageModel(TestCase):
         self.assertEqual(image.stored_filename, expected_stored)
         self.assertNotEqual(image.stored_filename, "name.jpg")
 
+    def test_stored_filename_autogenerates_extension(self):
+        image = self._create_image("file")
+
+        image.refresh_from_db()
+
+        expected_stored = f"{image.id}.jpeg"
+
+        self.assertEqual(image.stored_filename, expected_stored)
+
     def test_duplicate_label_raises_exception(self):
         image = self._create_image()
         image.labels = ["cat", "cat"]
@@ -129,3 +138,28 @@ class TestImageModel(TestCase):
         with self.assertRaises(ValidationError):
             image.save()
 
+    def test_mime_type_is_lowercased_on_save(self):
+        image = Image.objects.create(
+            collection=self.collection,
+            filename="test.jpg",
+            mime_type="ImAgE/jPeG",
+            size_bytes=1000
+        )
+
+        image.refresh_from_db()
+        self.assertEqual(image.mime_type, "image/jpeg")
+
+    def test_stored_filename_uses_lowercased_extension(self):
+        image = Image.objects.create(
+            collection=self.collection,
+            filename="file",
+            mime_type="ImAgE/jPeG",
+            size_bytes=1000
+        )
+
+        image.refresh_from_db()
+
+        expected_ext = "jpeg"
+        expected_filename = f"{image.id}.{expected_ext}"
+
+        self.assertEqual(image.stored_filename, expected_filename)
