@@ -30,4 +30,3 @@ class CollectionSerializer(LabelValidationMixin, serializers.ModelSerializer):
             "created_at",
             "updated_at"
         ]
-        
