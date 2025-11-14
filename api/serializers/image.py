@@ -1,10 +1,12 @@
-from django.core.exceptions import ValidationError
-from rest_framework import serializers
-from api.models.image import Image, MIME_TYPE_REGEX, ALLOWED_MIME_TYPES
 import re
 
+from rest_framework import serializers
 
-class ImageSerializer(serializers.ModelSerializer):
+from api.models.image import Image, MIME_TYPE_REGEX, ALLOWED_MIME_TYPES
+from api.serializers.mixins import HasLabelsSerializerMixin
+
+
+class ImageSerializer(HasLabelsSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
@@ -37,9 +39,3 @@ class ImageSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"MIME type not allowed: {value}.")
 
         return value
-
-    def validate_labels(self, labels):
-        if labels and len(labels) != len(set(labels)):
-            raise ValidationError("Labels must be have unique values.")
-
-        return labels

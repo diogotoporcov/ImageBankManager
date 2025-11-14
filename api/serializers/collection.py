@@ -1,11 +1,11 @@
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from api.models import Image
 from api.models.collection import Collection
+from api.serializers.mixins import HasLabelsSerializerMixin
 
 
-class CollectionSerializer(serializers.ModelSerializer):
+class CollectionSerializer(HasLabelsSerializerMixin, serializers.ModelSerializer):
     images = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
@@ -38,9 +38,3 @@ class CollectionSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at"
         ]
-
-    def validate_labels(self, labels):
-        if labels and len(labels) != len(set(labels)):
-            raise ValidationError("Labels must be have unique values.")
-
-        return labels
