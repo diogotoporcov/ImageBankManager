@@ -9,6 +9,7 @@ class HasUUID(models.Model):
         primary_key=True,
         default=uuid.uuid4,
         editable=False,
+        help_text=f"A UUID string identifying this item."
     )
 
     if TYPE_CHECKING:
