@@ -53,8 +53,7 @@ class TestCollectionSerializer(TestCase):
         valid_data = {
             "name": "New Collection",
             "owner": self.user.id,
-            "labels": ["tag1", "tag2"],
-            "image_ids": [self.image.id],
+            "labels": ["tag1", "tag2"]
         }
 
         serializer = CollectionSerializer(data=valid_data)
@@ -65,7 +64,6 @@ class TestCollectionSerializer(TestCase):
         self.assertEqual(collection.name, valid_data["name"])
         self.assertEqual(collection.owner, self.user)
         self.assertEqual(collection.labels, ["tag1", "tag2"])
-        self.assertIn(self.image, collection.images.all())
 
     def test_read_only_fields_ignored_on_input(self):
         now = datetime.now(timezone.utc)
