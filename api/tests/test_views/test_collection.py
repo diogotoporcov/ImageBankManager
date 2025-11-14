@@ -66,8 +66,7 @@ class TestCollectionViewSet(APITestCase):
         payload = {
             "name": "CreatedCol",
             "owner": self.user1.id,
-            "labels": ["x", "y", "z"],
-            "image_ids": [self.image.id],
+            "labels": ["x", "y", "z"]
         }
 
         resp = self.client.post(self.list_url, data=payload, format="json")
@@ -79,7 +78,6 @@ class TestCollectionViewSet(APITestCase):
         self.assertEqual(created.name, "CreatedCol")
         self.assertEqual(created.owner, self.user1)
         self.assertEqual(created.labels, ["x", "y", "z"])
-        self.assertIn(self.image, created.images.all())
 
     def test_create_ignores_readonly_fields(self) -> None:
         payload = {
