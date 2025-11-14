@@ -5,3 +5,4 @@ pgvector
 django-guardian
 psycopg2-binary
 django[argon2]
+dj_database_url
