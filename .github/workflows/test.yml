@@ -14,7 +14,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: ankane/pgvector:pg18
         env:
           POSTGRES_USER: django
           POSTGRES_PASSWORD: django
@@ -45,6 +45,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Enable pgvector extension
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql postgres://django:django@localhost:5432/test_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: Run migrations
         run: |
