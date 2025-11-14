@@ -3,10 +3,10 @@ import re
 from rest_framework import serializers
 
 from api.models.image import Image, MIME_TYPE_REGEX, ALLOWED_MIME_TYPES
-from api.serializers.mixins import HasLabelsSerializerMixin
+from api.serializers.mixins import LabelValidationMixin
 
 
-class ImageSerializer(HasLabelsSerializerMixin, serializers.ModelSerializer):
+class ImageSerializer(LabelValidationMixin, serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [

@@ -1,1 +1,1 @@
-from .has_labels import HasLabelsSerializerMixin
+from .label_validation_mixin import LabelValidationMixin
