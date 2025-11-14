@@ -6,3 +6,5 @@ django-guardian
 psycopg2-binary
 django[argon2]
 dj_database_url
+drf-spectacular
+drf-spectacular-sidecar
