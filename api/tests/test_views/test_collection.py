@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
-from api.models import Collection, Label, Image
+from api.models import Collection, Image
 
 User = get_user_model()
 
@@ -32,10 +32,17 @@ class TestCollectionViewSet(APITestCase):
             username="user2", password=self.DEFAULT_PASSWORD, full_name="User Two"
         )
 
-        self.collection1 = Collection.objects.create(owner=self.user1, name="Collection 1")
-        self.collection2 = Collection.objects.create(owner=self.user2, name="Collection 2")
+        self.collection1 = Collection.objects.create(
+            owner=self.user1,
+            name="Collection 1",
+            labels=["foo", "bar"]
+        )
+        self.collection2 = Collection.objects.create(
+            owner=self.user2,
+            name="Collection 2",
+            labels=["alpha"]
+        )
 
-        self.label = Label.objects.create(owner=self.user1, label="Test Label")
         self.image = Image.objects.create(
             collection=self.collection1,
             filename="filename.jpg",
@@ -59,24 +66,19 @@ class TestCollectionViewSet(APITestCase):
         payload = {
             "name": "CreatedCol",
             "owner": self.user1.id,
-            "label_ids": [self.label.id],
+            "labels": ["x", "y", "z"],
             "image_ids": [self.image.id],
         }
 
-        print(self.user1.id == self.label.owner.id == self.image.owner.id)
-
         resp = self.client.post(self.list_url, data=payload, format="json")
         body = resp.json()
-        print("START OIE")
-        print(body)
-        print("END OIE")
 
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         created = Collection.objects.get(id=body["id"])
 
         self.assertEqual(created.name, "CreatedCol")
         self.assertEqual(created.owner, self.user1)
-        self.assertIn(self.label, created.labels.all())
+        self.assertEqual(created.labels, ["x", "y", "z"])
         self.assertIn(self.image, created.images.all())
 
     def test_create_ignores_readonly_fields(self) -> None:
@@ -84,6 +86,7 @@ class TestCollectionViewSet(APITestCase):
             "name": "ColIgnore",
             "owner": str(self.user1.id),
             "is_default": True,
+            "labels": ["ok"],
         }
 
         resp = self.client.post(self.list_url, data=payload, format="json")
@@ -106,12 +109,14 @@ class TestCollectionViewSet(APITestCase):
         data = resp.json()
         self.assertEqual(UUID(data["id"]), self.collection1.id)
         self.assertEqual(data["name"], self.collection1.name)
+        self.assertEqual(data["labels"], ["foo", "bar"])
 
     def test_put_updates_collection(self) -> None:
         url = reverse("collection-detail", kwargs={"pk": str(self.collection1.id)})
         payload = {
             "name": "C1 Updated",
             "owner": str(self.user1.id),
+            "labels": ["new"],
         }
 
         resp = self.client.put(url, data=payload, format="json")
@@ -119,6 +124,7 @@ class TestCollectionViewSet(APITestCase):
 
         self.collection1.refresh_from_db()
         self.assertEqual(self.collection1.name, "C1 Updated")
+        self.assertEqual(self.collection1.labels, ["new"])
 
     def test_put_cannot_set_is_default(self) -> None:
         url = reverse("collection-detail", kwargs={"pk": str(self.collection1.id)})
@@ -164,6 +170,7 @@ class TestCollectionViewSet(APITestCase):
             "name": "AnotherDefault",
             "owner": str(self.user1.id),
             "is_default": True,
+            "labels": [],
         }
 
         resp = self.client.post(self.list_url, data=payload, format="json")

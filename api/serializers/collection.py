@@ -1,23 +1,11 @@
-from typing import List
-
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from api.models import Label, Image
+from api.models import Image
 from api.models.collection import Collection
-from api.serializers.label import LabelSerializer
 
 
 class CollectionSerializer(serializers.ModelSerializer):
-    labels = LabelSerializer(many=True, read_only=True)
-    label_ids = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Label.objects.all(),
-        required=False,
-        source="labels",
-        write_only=True
-    )
-
     images = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
@@ -38,7 +26,6 @@ class CollectionSerializer(serializers.ModelSerializer):
             "is_default",
             "owner",
             "labels",
-            "label_ids",
             "images",
             "image_ids",
             "created_at",
@@ -52,13 +39,8 @@ class CollectionSerializer(serializers.ModelSerializer):
             "updated_at"
         ]
 
-    def validate_label_ids(self, labels: List[Label]) -> List[Label]:
-        owner: str = self.initial_data.get("owner") or self.instance.owner.id
-
-        for label in labels:
-            if str(label.owner.id) != str(owner):
-                raise ValidationError(
-                    f"Label '{str(label)}' does not belong to the same owner as the collection."
-                )
+    def validate_labels(self, labels):
+        if labels and len(labels) != len(set(labels)):
+            raise ValidationError("Labels must be have unique values.")
 
         return labels

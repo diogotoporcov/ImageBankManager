@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from api.models import Collection, Label
+from api.models import Collection
 
 User = get_user_model()
 
@@ -96,16 +96,22 @@ class TestCollectionModel(TestCase):
             default_col.delete()
 
     def test_label_association(self):
-        label = Label.objects.create(
-            owner=self.user,
-            label="Test Collection Label"
-        )
+        label = "cat"
 
         collection = Collection.objects.create(
             owner=self.user,
             name=self.DEFAULT_COLLECTION_NAME
         )
 
-        collection.labels.add(label)
-        self.assertIn(label, collection.labels.all())
-        self.assertIn(collection, label.collections.all())
+        collection.labels.append(label)
+        self.assertIn(label, collection.labels)
+
+    def test_duplicate_label_raises_exception(self):
+        collection = Collection(
+            owner=self.user,
+            name="Test Collection",
+            labels=["cat", "cat"],
+        )
+
+        with self.assertRaises(ValidationError):
+            collection.save()

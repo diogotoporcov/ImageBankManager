@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from api.models.abstract.has_labels import HasLabels
 
-class Collection(models.Model):
+
+class Collection(HasLabels):
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -19,9 +21,7 @@ class Collection(models.Model):
     )
 
     name = models.CharField(max_length=64)
-    is_default = models.BooleanField(default=False)
-
-    labels = models.ManyToManyField("Label", related_name="collections", blank=True)
+    is_default = models.BooleanField(default=False, editable=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,14 +31,18 @@ class Collection(models.Model):
         from django.db.models.fields.related_descriptors import RelatedManager
         images: RelatedManager[Image]
 
-    def clean(self):
-        if self.is_default:
-            existing = Collection.objects.filter(owner=self.owner, is_default=True)
-            if self.pk:
-                existing = existing.exclude(pk=self.pk)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner"],
+                condition=models.Q(is_default=True),
+                name="unique_default_collection_per_user"
+            )
+        ]
 
-            if existing.exists():
-                raise ValidationError("User already has a default collection.")
+    def clean(self):
+        self._validate_is_default_unchanged()
+        super().clean()
 
     def delete(self, *args, **kwargs):
         if self.is_default:
@@ -47,13 +51,16 @@ class Collection(models.Model):
         super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        if self.pk:
-            old = Collection.objects.filter(pk=self.pk).first()
-            if old and not old.is_default and self.is_default:
-                raise ValidationError("Cannot update a collection to is_default=True.")
-
         self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.owner.username})"
+
+    def _validate_is_default_unchanged(self):
+        if self._state.adding:
+            return
+
+        old = Collection.objects.get(pk=self.pk)
+        if old.is_default != self.is_default:
+            raise ValidationError("You cannot modify is_default.")
