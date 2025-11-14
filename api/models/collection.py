@@ -1,30 +1,14 @@
-import uuid
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api.models.abstract.has_labels import HasLabels
+from api.models.abstract import HasLabels, HasOwner, HasUUID, TimeStampedModel
 
 
-class Collection(HasLabels):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-
-    owner = models.ForeignKey(
-        "User",
-        on_delete=models.CASCADE,
-        related_name="collections"
-    )
-
+class Collection(HasUUID, HasOwner, HasLabels, TimeStampedModel):
     name = models.CharField(max_length=64)
     is_default = models.BooleanField(default=False, editable=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     if TYPE_CHECKING:
         from api.models.image import Image
