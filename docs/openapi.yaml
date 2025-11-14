@@ -7,6 +7,13 @@ paths:
   /api/collections/:
     get:
       operationId: collections_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       tags:
       - collections
       security:
@@ -160,6 +167,13 @@ paths:
   /api/images/:
     get:
       operationId: images_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       tags:
       - images
       security:
@@ -313,6 +327,13 @@ paths:
   /api/users/:
     get:
       operationId: users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       tags:
       - users
       security:
