@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api.models.abstract.has_label import HasLabels
+from api.models.abstract.has_labels import HasLabels
 
 MIME_TYPE_REGEX = r"(?i)^image/[a-z0-9\-+.]+$"
 ALLOWED_MIME_TYPES = {
