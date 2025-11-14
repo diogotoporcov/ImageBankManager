@@ -3,12 +3,10 @@ name: Django Automated Tests
 on:
   push:
     branches:
-      - master
-      - "test/**"
+      - "**"
   pull_request:
     branches:
-      - master
-      - "test/**"
+      - "**"
 
 jobs:
   test:
