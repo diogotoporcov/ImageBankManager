@@ -28,11 +28,13 @@ class ImageSerializer(serializers.ModelSerializer):
         ]
 
     def validate_mime_type(self, value: str):
+        value = value.lower()
+
         if not re.match(MIME_TYPE_REGEX, value):
             raise serializers.ValidationError("Invalid MIME type format.")
 
         if value not in ALLOWED_MIME_TYPES:
-            raise serializers.ValidationError("MIME type not allowed.")
+            raise serializers.ValidationError(f"MIME type not allowed: {value}.")
 
         return value
 

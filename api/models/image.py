@@ -58,12 +58,16 @@ class Image(HasLabels):
     def __str__(self):
         return f"{self.filename} ({self.owner.username})"
 
+    def clean(self):
+        self.mime_type = self.mime_type.lower()
+        super().clean()
+
     def save(self, *args, **kwargs):
         self.full_clean()
 
         self.owner = self.collection.owner
 
-        ext = self.mime_type.removeprefix("image/").lower()
+        ext = self.mime_type.removeprefix("image/")
         self.stored_filename = f"{self.id}.{ext}"
 
         super().save(*args, **kwargs)
