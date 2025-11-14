@@ -4,9 +4,23 @@ on:
   push:
     branches:
       - "**"
+    paths-ignore:
+      - ".gitignore"
+      - "LICENSE"
+      - "README.md"
+      - "README/**"
+      - "docs/**"
+      - "*.md"
   pull_request:
     branches:
       - "**"
+    paths-ignore:
+      - ".gitignore"
+      - "LICENSE"
+      - "README.md"
+      - "README/**"
+      - "docs/**"
+      - "*.md"
 
 jobs:
   test:
