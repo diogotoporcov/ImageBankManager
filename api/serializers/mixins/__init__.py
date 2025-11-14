@@ -1,0 +1,1 @@
+from .has_labels import HasLabelsSerializerMixin
