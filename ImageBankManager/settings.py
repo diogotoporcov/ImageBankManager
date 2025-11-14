@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "rest_framework",
     "rest_framework.authtoken",
-    "guardian"
+    "guardian",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
 ]
 
 AUTH_USER_MODEL = "api.User"
@@ -55,6 +57,17 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Image Bank Manager",
+    "DESCRIPTION": "API documentation for Image Bank Manager",
+    "VERSION": "1.0.0",
+
+    "APPEND_COMPONENTS": {},
+    "POSTPROCESSING_HOOKS": [],
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 AUTHENTICATION_BACKENDS = [
