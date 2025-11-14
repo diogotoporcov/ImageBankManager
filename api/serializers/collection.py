@@ -2,10 +2,10 @@ from rest_framework import serializers
 
 from api.models import Image
 from api.models.collection import Collection
-from api.serializers.mixins import HasLabelsSerializerMixin
+from api.serializers.mixins import LabelValidationMixin
 
 
-class CollectionSerializer(HasLabelsSerializerMixin, serializers.ModelSerializer):
+class CollectionSerializer(LabelValidationMixin, serializers.ModelSerializer):
     images = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
