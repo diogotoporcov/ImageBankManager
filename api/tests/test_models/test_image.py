@@ -2,10 +2,11 @@ import uuid
 from typing import Optional
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from api.models import Image, Collection, Label
+from api.models import Image, Collection
 
 User = get_user_model()
 
@@ -84,16 +85,12 @@ class TestImageModel(TestCase):
         self.assertEqual(image2.filename, filename2)
 
     def test_label_association(self):
-        label = Label.objects.create(
-            owner=self.user,
-            label="Test Image Label"
-        )
+        label = "cat"
 
         image = self._create_image("labeled_image.jpeg")
-        image.labels.add(label)
+        image.labels.append(label)
 
-        self.assertIn(label, image.labels.all())
-        self.assertIn(image, label.images.all())
+        self.assertIn(label, image.labels)
 
     def test_owner_is_auto_generated(self):
         dummy_user = User.objects.create_user(
@@ -116,13 +113,7 @@ class TestImageModel(TestCase):
         self.assertNotEqual(image.owner, dummy_user)
 
     def test_stored_filename_is_auto_generated(self):
-        image = Image.objects.create(
-            collection=self.collection,
-            stored_filename="name.jpg",
-            filename="file.jpg",
-            mime_type="image/jpeg",
-            size_bytes=500,
-        )
+        image = self._create_image()
 
         image.refresh_from_db()
 
@@ -130,3 +121,11 @@ class TestImageModel(TestCase):
 
         self.assertEqual(image.stored_filename, expected_stored)
         self.assertNotEqual(image.stored_filename, "name.jpg")
+
+    def test_duplicate_label_raises_exception(self):
+        image = self._create_image()
+        image.labels = ["cat", "cat"]
+
+        with self.assertRaises(ValidationError):
+            image.save()
+

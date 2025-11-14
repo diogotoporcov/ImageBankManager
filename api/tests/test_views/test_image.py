@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
-from api.models import Image, Label, Collection
+from api.models import Image, Collection
 
 User = get_user_model()
 
@@ -35,13 +35,12 @@ class TestImageViewSet(APITestCase):
         self.col1 = Collection.objects.create(owner=self.user1, name="Collection 1")
         self.col2 = Collection.objects.create(owner=self.user2, name="Collection 2")
 
-        self.label = Label.objects.create(owner=self.user1, label="Label 1")
-
         self.image1 = Image.objects.create(
             collection=self.col1,
             filename="image1.jpg",
             mime_type="image/jpeg",
             size_bytes=1000,
+            labels=["foo"],
         )
 
         self.image2 = Image.objects.create(
@@ -49,6 +48,7 @@ class TestImageViewSet(APITestCase):
             filename="image2.jpg",
             mime_type="image/jpeg",
             size_bytes=2000,
+            labels=["bar", "baz"],
         )
 
         self.list_url = reverse("image-list")
@@ -69,7 +69,7 @@ class TestImageViewSet(APITestCase):
             "filename": "filename.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
-            "label_ids": [self.label.id],
+            "labels": ["x", "y"],
         }
 
         resp = self.client.post(self.list_url, data=payload, format="json")
@@ -80,7 +80,7 @@ class TestImageViewSet(APITestCase):
 
         self.assertEqual(created.owner, self.user1)
         self.assertEqual(created.collection, self.col1)
-        self.assertIn(self.label, created.labels.all())
+        self.assertEqual(created.labels, ["x", "y"])
 
     def test_create_missing_required_fields_fails(self) -> None:
         payload = {
@@ -100,6 +100,7 @@ class TestImageViewSet(APITestCase):
             "size_bytes": 1000,
             "created_at": now,
             "updated_at": now,
+            "labels": ["ignored"],
         }
 
         resp = self.client.post(self.list_url, data=payload, format="json")
@@ -116,6 +117,7 @@ class TestImageViewSet(APITestCase):
         data = resp.json()
         self.assertEqual(UUID(data["id"]), self.image1.id)
         self.assertEqual(data["filename"], self.image1.filename)
+        self.assertEqual(data["labels"], ["foo"])
 
     def test_put_updates_image(self) -> None:
         url = reverse("image-detail", kwargs={"pk": str(self.image1.id)})
@@ -124,6 +126,7 @@ class TestImageViewSet(APITestCase):
             "filename": "updated.jpg",
             "mime_type": "image/jpeg",
             "size_bytes": 1000,
+            "labels": ["new1", "new2"],
         }
 
         resp = self.client.put(url, data=payload, format="json")
@@ -132,6 +135,7 @@ class TestImageViewSet(APITestCase):
         self.image1.refresh_from_db()
         self.assertEqual(self.image1.filename, "updated.jpg")
         self.assertEqual(self.image1.size_bytes, 1000)
+        self.assertEqual(self.image1.labels, ["new1", "new2"])
 
     def test_patch_updates_partial_fields(self) -> None:
         url = reverse("image-detail", kwargs={"pk": str(self.image2.id)})
@@ -148,6 +152,7 @@ class TestImageViewSet(APITestCase):
             filename="del.jpg",
             mime_type="image/jpeg",
             size_bytes=10,
+            labels=["temp"],
         )
         url = reverse("image-detail", kwargs={"pk": str(image.id)})
 

@@ -2,7 +2,7 @@ from datetime import timedelta, datetime, timezone
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from api.models import Collection, Label, Image
+from api.models import Collection, Image
 from api.serializers.collection import CollectionSerializer
 
 User = get_user_model()
@@ -25,7 +25,6 @@ class TestCollectionSerializer(TestCase):
             name=self.DEFAULT_COLLECTION_NAME,
         )
 
-        self.label = Label.objects.create(owner=self.user, label="Serializer Label")
         self.image = Image.objects.create(
             collection=self.collection,
             filename="filename.jpg",
@@ -54,7 +53,7 @@ class TestCollectionSerializer(TestCase):
         valid_data = {
             "name": "New Collection",
             "owner": self.user.id,
-            "label_ids": [self.label.id],
+            "labels": ["tag1", "tag2"],
             "image_ids": [self.image.id],
         }
 
@@ -65,7 +64,7 @@ class TestCollectionSerializer(TestCase):
         self.assertIsInstance(collection, Collection)
         self.assertEqual(collection.name, valid_data["name"])
         self.assertEqual(collection.owner, self.user)
-        self.assertIn(self.label, collection.labels.all())
+        self.assertEqual(collection.labels, ["tag1", "tag2"])
         self.assertIn(self.image, collection.images.all())
 
     def test_read_only_fields_ignored_on_input(self):
@@ -91,15 +90,25 @@ class TestCollectionSerializer(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn("name", serializer.errors)
 
+    def test_duplicate_labels_rejected(self):
+        data = {
+            "name": "Collection With Duplicates",
+            "owner": self.user.id,
+            "labels": ["x", "x", "y"],
+        }
+
+        serializer = CollectionSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("labels", serializer.errors)
+
     def test_label_and_image_relationships_are_read_only_on_output(self):
-        self.collection.labels.add(self.label)
+        self.collection.labels = ["x", "y"]
         self.collection.images.add(self.image)
 
         serializer = CollectionSerializer(self.collection)
         data = serializer.data
 
-        self.assertEqual(len(data["labels"]), 1)
+        self.assertEqual(len(data["labels"]), 2)
+        self.assertEqual(data["labels"], ["x", "y"])
         self.assertEqual(len(data["images"]), 1)
-        self.assertEqual(data["labels"][0]["label"], self.label.label)
         self.assertEqual(data["images"][0], self.image.id)
-
