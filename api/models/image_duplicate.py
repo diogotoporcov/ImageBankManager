@@ -2,8 +2,10 @@ from typing import TYPE_CHECKING
 
 from django.db import models
 
+from api.models.abstract import TimeStampedModel
 
-class ImageDuplicate(models.Model):
+
+class ImageDuplicate(TimeStampedModel):
     image = models.OneToOneField(
         "Image",
         on_delete=models.CASCADE,
@@ -16,8 +18,6 @@ class ImageDuplicate(models.Model):
         on_delete=models.CASCADE,
         related_name="duplicates"
     )
-
-    created_at = models.DateTimeField(auto_now_add=True)
 
     if TYPE_CHECKING:
         from api.models.image import Image

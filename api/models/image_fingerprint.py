@@ -3,8 +3,10 @@ from typing import TYPE_CHECKING
 from django.db import models
 from pgvector.django import VectorField
 
+from api.models.abstract import TimeStampedModel
 
-class ImageFingerprint(models.Model):
+
+class ImageFingerprint(TimeStampedModel):
     image = models.OneToOneField(
         "Image",
         on_delete=models.CASCADE,
@@ -15,9 +17,6 @@ class ImageFingerprint(models.Model):
     sha256 = models.CharField(max_length=64, db_index=True)
     phash = models.BigIntegerField(db_index=True)
     embedding = VectorField(dimensions=512)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     if TYPE_CHECKING:
         from api.models.image import Image
