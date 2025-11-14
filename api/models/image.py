@@ -2,9 +2,10 @@ import re
 import uuid
 from typing import TYPE_CHECKING
 
-from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
+
+from api.models.abstract.has_label import HasLabels
 
 MIME_TYPE_REGEX = r"(?i)^image/[a-z0-9\-+.]+$"
 ALLOWED_MIME_TYPES = {
@@ -16,7 +17,7 @@ ALLOWED_MIME_TYPES = {
 }
 
 
-class Image(models.Model):
+class Image(HasLabels):
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -42,13 +43,6 @@ class Image(models.Model):
     mime_type = models.CharField(max_length=100)
     size_bytes = models.BigIntegerField()
 
-    labels = ArrayField(
-        base_field=models.CharField(max_length=64),
-        default=list,
-        blank=True,
-        size=16
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -63,10 +57,6 @@ class Image(models.Model):
 
     def __str__(self):
         return f"{self.filename} ({self.owner.username})"
-
-    def clean(self):
-        self._validate_mime_type()
-        self._validate_labels()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -84,10 +74,3 @@ class Image(models.Model):
 
         if self.mime_type not in ALLOWED_MIME_TYPES:
             raise ValidationError({"mime_type": "Mime type not allowed."})
-
-    def _validate_labels(self):
-        if not isinstance(self.labels, list) or not all(isinstance(label, str) for label in self.labels):
-            raise ValidationError("Labels must be a list of strings.")
-
-        if len(self.labels) != len(set(self.labels)):
-            raise ValidationError("Labels must be unique.")
