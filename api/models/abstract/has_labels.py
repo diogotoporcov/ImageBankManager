@@ -4,14 +4,16 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from ImageBankManager.config import config
+
 
 class HasLabels(models.Model):
     labels = ArrayField(
         base_field=models.CharField(max_length=64),
         default=list,
         blank=True,
-        size=16,
-        help_text="List of labels associated with this item. Supports up to 16 entries.",
+        size=config.MAX_LABELS,
+        help_text=f"List of labels associated with this item. Supports up to {config.MAX_LABELS} entries.",
     )
 
     if TYPE_CHECKING:

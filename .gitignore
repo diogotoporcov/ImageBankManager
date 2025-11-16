@@ -4,3 +4,4 @@
 merger.ignore
 merger.txt
 *__pycache__*
+.env

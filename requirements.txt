@@ -8,3 +8,4 @@ django[argon2]
 dj_database_url
 drf-spectacular
 drf-spectacular-sidecar
+pydantic-settings

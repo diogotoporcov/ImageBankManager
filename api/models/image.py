@@ -3,17 +3,9 @@ import re
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from ImageBankManager.config import config
 from api.models.abstract import HasUUID, HasOwner, TimeStampedModel
 from api.models.abstract.has_labels import HasLabels
-
-MIME_TYPE_REGEX = r"(?i)^image/[a-z0-9\-+.]+$"
-ALLOWED_MIME_TYPES = {
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/bmp",
-    "image/tiff",
-}
 
 
 class Image(HasUUID, HasOwner, HasLabels, TimeStampedModel):
@@ -63,8 +55,8 @@ class Image(HasUUID, HasOwner, HasLabels, TimeStampedModel):
         super().save(*args, **kwargs)
 
     def _validate_mime_type(self):
-        if not re.match(MIME_TYPE_REGEX, self.mime_type):
+        if not re.match(config.MIME_TYPE_REGEX, self.mime_type):
             raise ValidationError({"mime_type": "Invalid mime type format."})
 
-        if self.mime_type not in ALLOWED_MIME_TYPES:
+        if self.mime_type not in config.ALLOWED_MIME_TYPES:
             raise ValidationError({"mime_type": "Mime type not allowed."})

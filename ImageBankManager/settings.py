@@ -14,6 +14,8 @@ from pathlib import Path
 
 import dj_database_url
 
+from ImageBankManager.config import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(5n&2l@+&w74p$x2!-9)$g4c9%@!mfu+--fh_qtufn3tfg)czg'
+SECRET_KEY = config.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config.ALLOWED_HOSTS
 
 
 # Application definition
@@ -109,9 +111,7 @@ WSGI_APPLICATION = 'ImageBankManager.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://imb:imb@localhost:5432/imb'
-    )
+    "default": dj_database_url.parse(config.DB_URL)
 }
 
 # Password validation
