@@ -31,7 +31,7 @@ def load_config(cfg_path: Path, env_path: Path = Path(".env")) -> Config:
     parser.read(cfg_path)
 
     return Config(
-        MAX_LABELS=parser.getint("models.images", "MAX_LABELS"),
+        MAX_LABELS=parser.getint("models.image", "MAX_LABELS"),
         ALLOWED_MIME_TYPES=parser.get("upload", "ALLOWED_MIME_TYPES").split(","),
         SECRET_KEY=env.str("SECRET_KEY"),
         ALLOWED_HOSTS=env.list("ALLOWED_HOSTS"),
