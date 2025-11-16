@@ -62,6 +62,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Generate test .env from template
+        run: |
+          cp .env.example .env
+          
+          SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
+
+          sed -i "s|SECRET_KEY=.*|SECRET_KEY=$SECRET_KEY|" .env
+          sed -i "s|DB_NAME=.*|DB_NAME=test_db|" .env
+          sed -i "s|DB_USER=.*|DB_USER=django|" .env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=django|" .env
+          sed -i "s|DB_HOST=.*|DB_HOST=localhost|" .env
+          sed -i "s|DB_PORT=.*|DB_PORT=5432|" .env
+
+          DB_URL="postgres://django:django@localhost:5432/test_db"
+          sed -i "s|DB_URL=.*|DB_URL=$DB_URL|" .env
+
       - name: Enable pgvector extension
         run: |
           sudo apt-get update
