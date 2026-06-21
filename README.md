@@ -1,3 +1,7 @@
+> ⚠️ **Notice: Project Deprecated**  
+> This repository has been **moved to [https://github.com/diogotoporcov/Finder2](https://github.com/diogotoporcov/FileManager)**.  
+> No further updates or support will be provided here
+
 # ImageBankManager
 
 [![Python](https://img.shields.io/badge/python-3.11.x-blue.svg)](https://www.python.org/)
