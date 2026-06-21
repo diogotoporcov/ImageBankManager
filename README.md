@@ -1,5 +1,5 @@
 > ⚠️ **Notice: Project Deprecated**  
-> This repository has been **moved to [https://github.com/diogotoporcov/Finder2](https://github.com/diogotoporcov/FileManager)**.  
+> This repository has been **moved to [https://github.com/diogotoporcov/FileManager](https://github.com/diogotoporcov/FileManager)**.  
 > No further updates or support will be provided here
 
 # ImageBankManager
